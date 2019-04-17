@@ -23,7 +23,9 @@
     var cheerio = require('cheerio');
     var loadSCP = function() {
       console.log("loading scp...")
-      url = 'http://www.scp-wiki.net/scp-173';
+      //Hardcoding SCP-173 as the SCP to fetch for now
+      //// TODO: Implement dynamic SCP choice
+      url = 'http://www.scp-wiki.net/scp-049';
 
       // The structure of our request call
       // The first parameter is our URL
@@ -38,16 +40,12 @@
 
           var title, itemID, objectClass, image, imageCaption, points;
 
-          // We'll use the unique header class as a starting point.
 
-          $('.scp-image-block').filter(function() {
-            var data = $(this);
 
-            image = data.children().first().attr('src');
-            imageCaption = data.children().first().next().text();
-            console.log("Image url: " + image)
-            document.getElementById('scp-image').src = image;
-          })
+          image = $('.scp-image-block').find(".image").attr('src');
+          //imageCaption = data.children().first().next().text();
+          console.log("Image url: " + image)
+          document.getElementById('scp-image').src = image;
 
           $('.rate-points').filter(function() {
             var data = $(this);
@@ -142,7 +140,7 @@
         <center>Euclid-Class</center>
       </div>
       <div class="one-third column">
-        <center>Page 1/2</center>
+        <center>Page <span id="currentPage"></span>/<span id="maxPages"></span></center>
       </div>
     </div>
   </div>
@@ -151,6 +149,8 @@
       <div id="page1">
         <span class="label">Item Number:</span> <span class="data">{{title}}</span><br>
         <span class="label">Object Class:</span> <span class="data">{{objectClass}}</span><br>
+      </div>
+      <div id="page2">
         <span class="label">Special Containment Procedures:</span><br>
         <span class="data tab">{{SCPs}}</span>
       </div>
@@ -159,6 +159,7 @@
   </div>
 
   <script>
+    document.getElementById("maxPages").innerHTML = pages;
     function replace(data) {
       console.log(data)
       var x = document.getElementsByTagName("div");
@@ -172,13 +173,14 @@
 
     function hideAll() {
       for (var i = 1; i < pages; i++) {
-        document.getElementById("page" + i).style.display = "none";
+        document.getElementById("page" + (i + 1)).style.display = "none";
       }
     }
 
     function showPage(page) {
       document.getElementById("page" + page).style.display = "block";
       pageNumber = page;
+      document.getElementById("currentPage").innerHTML = pageNumber;
     }
 
     function hidePage(page) {
@@ -186,6 +188,7 @@
     }
 
     function switchPage(page) {
+      console.log(pageNumber, page)
       hidePage(pageNumber);
       showPage(page);
     }
