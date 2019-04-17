@@ -8,11 +8,12 @@ let mainWindow
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
     webPreferences: {
       nodeIntegration: true
-    }
+    },
+    frame: false,
+    fullscreen: true,
+    backgroundColor: '#000000'
   })
 
   // and load the index.html of the app.
@@ -47,6 +48,10 @@ app.on('activate', function () {
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow()
 })
+
+function log(message) {
+  console.log(message)
+}
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
