@@ -1,168 +1,172 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Hello World!</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <!--<link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">-->
+<head>
+  <meta charset="UTF-8">
+  <title>Hello World!</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <link rel="stylesheet" href="./css/normalize.css">
-    <link rel="stylesheet" href="./css/skeleton.css">
-    <link rel="stylesheet" href="./css/landing.css">
-    <link rel="stylesheet" href="./css/styling.css">
-  </head>
-  <body class="crt">
-    <script>
-      // You can also require other files to run in this process
-      require('./renderer.js')
-      var fs = require('fs');
-      var request = require('request');
-      var cheerio = require('cheerio');
-      var loadSCP = function() {
-        console.log("loading scp...")
-        url = 'http://www.scp-wiki.net/scp-173';
+  <!--<link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">-->
 
-          // The structure of our request call
-          // The first parameter is our URL
-          // The callback function takes 3 parameters, an error, response status code and the html
+  <link rel="stylesheet" href="./css/normalize.css">
+  <link rel="stylesheet" href="./css/skeleton.css">
+  <link rel="stylesheet" href="./css/landing.css">
+  <link rel="stylesheet" href="./css/styling.css">
+</head>
 
-          request(url, function(error, response, html){
+<body class="crt">
+  <script>
+    // You can also require other files to run in this process
+    require('./renderer.js')
+    var fs = require('fs');
+    var request = require('request');
+    var cheerio = require('cheerio');
+    var loadSCP = function() {
+      console.log("loading scp...")
+      url = 'http://www.scp-wiki.net/scp-173';
 
-              // First we'll check to make sure no errors occurred when making the request
+      // The structure of our request call
+      // The first parameter is our URL
+      // The callback function takes 3 parameters, an error, response status code and the html
 
-              if(!error){
-                  var $ = cheerio.load(html);
+      request(url, function(error, response, html) {
 
-                  var title, itemID, objectClass, image, imageCaption, points;
+        // First we'll check to make sure no errors occurred when making the request
 
-                  // We'll use the unique header class as a starting point.
+        if (!error) {
+          var $ = cheerio.load(html);
 
-                  $('.scp-image-block').filter(function(){
-                    var data = $(this);
+          var title, itemID, objectClass, image, imageCaption, points;
 
-                    image = data.children().first().attr('src');
-                    imageCaption = data.children().first().next().text();
-                    console.log("Image url: " + image)
-                    document.getElementById('scp-image').src = image;
-                  })
+          // We'll use the unique header class as a starting point.
 
-                  $('.rate-points').filter(function(){
-                    var data = $(this);
+          $('.scp-image-block').filter(function() {
+            var data = $(this);
 
-                    points = data.children().first().text();
-
-                    //document.getElementById("rating").innerHTML = points;
-                  })
-
-                  $('#page-title').filter(function(){
-                    var data = $(this);
-
-                    title = data.text();
-
-                    //document.getElementById("rating").innerHTML = points;
-                  })
-
-                  $('#main-content').filter(function(){
-
-                 // Let's store the data we filter into a variable so we can easily see what's going on.
-
-                      var data = $(this);
-
-                 // In examining the DOM we notice that the title rests within the first child element of the header tag.
-                 // Utilizing jQuery we can easily navigate and get the text by writing the following code:
-
-                      //title = data.children().first().next().text().trim();
-                      var pageContent = data.children().first().next().next().children();
-                      itemID = pageContent.first().next().text();
-
-                      oClass = $('strong:contains("Object Class:")')
-                      objectClass = oClass.parent().text().replace(/Object Class:/g, "");
-
-                      scp = $('strong:contains("Special Containment Procedures:")')
-                      SCPs = scp.parent().text().replace(/Special Containment Procedures:/g, "");
-
-                      console.log("Object Class: " + objectClass)
-                      console.log("Page content: " + pageContent)
-                      console.log("Page Title: " + title)
-                      console.log("Item ID: " + itemID)
-                      console.log("Item Class: " + objectClass)
-                      console.log("SpCoPrs: " + SCPs);
-                 // Once we have our title, we'll store it to the our json object.
-                      //document.getElementById("title").innerHTML = title;
-                      //document.getElementById("title").innerHTML = title;
-                      //document.getElementById("objectClass").innerHTML = objectClass;
-                  })
-                  replace({title: title, objectClass: objectClass, SCPs: SCPs});
-                  hideAll();
-                  showPage(1);
-              }
+            image = data.children().first().attr('src');
+            imageCaption = data.children().first().next().text();
+            console.log("Image url: " + image)
+            document.getElementById('scp-image').src = image;
           })
+
+          $('.rate-points').filter(function() {
+            var data = $(this);
+
+            points = data.children().first().text();
+
+            //document.getElementById("rating").innerHTML = points;
+          })
+
+          $('#page-title').filter(function() {
+            var data = $(this);
+
+            title = data.text();
+
+            //document.getElementById("rating").innerHTML = points;
+          })
+
+          $('#main-content').filter(function() {
+
+            // Let's store the data we filter into a variable so we can easily see what's going on.
+
+            var data = $(this);
+
+            // In examining the DOM we notice that the title rests within the first child element of the header tag.
+            // Utilizing jQuery we can easily navigate and get the text by writing the following code:
+
+            //title = data.children().first().next().text().trim();
+            var pageContent = data.children().first().next().next().children();
+            itemID = pageContent.first().next().text();
+
+            oClass = $('strong:contains("Object Class:")')
+            objectClass = oClass.parent().text().replace(/Object Class:/g, "");
+
+            scp = $('strong:contains("Special Containment Procedures:")')
+            SCPs = scp.parent().text().replace(/Special Containment Procedures:/g, "");
+
+            console.log("Object Class: " + objectClass)
+            console.log("Page content: " + pageContent)
+            console.log("Page Title: " + title)
+            console.log("Item ID: " + itemID)
+            console.log("Item Class: " + objectClass)
+            console.log("SpCoPrs: " + SCPs);
+            // Once we have our title, we'll store it to the our json object.
+            //document.getElementById("title").innerHTML = title;
+            //document.getElementById("title").innerHTML = title;
+            //document.getElementById("objectClass").innerHTML = objectClass;
+          })
+          replace({
+            title: title,
+            objectClass: objectClass,
+            SCPs: SCPs
+          });
+          hideAll();
+          showPage(1);
         }
-        loadSCP();
+      })
+    }
+    loadSCP();
 
-        document.onkeydown = checkKey;
-        var pages = 2;
-        var pageNumber = 1;
-        function checkKey(e) {
+    document.onkeydown = checkKey;
+    var pages = 2;
+    var pageNumber = 1;
 
-            e = e || window.event;
+    function checkKey(e) {
 
-            if (e.keyCode == '38') {
-                // up arrow
-            }
-            else if (e.keyCode == '40') {
-                // down arrow
-            }
-            else if (e.keyCode == '37') {
-              //left
-              if(pageNumber > 1) {
-                switchPage(pageNumber - 1);
-              }
-            }
-            else if (e.keyCode == '39') {
-              //right
-              if(pageNumber < pages) {
-                switchPage(pageNumber + 1);
-              }
-            }
+      e = e || window.event;
 
+      if (e.keyCode == '38') {
+        // up arrow
+      } else if (e.keyCode == '40') {
+        // down arrow
+      } else if (e.keyCode == '37') {
+        //left
+        if (pageNumber > 1) {
+          switchPage(pageNumber - 1);
         }
-    </script>
-    <div class="header">
-        <div class="row">
-          <div class="one-third column">
-            {{title}}
-          </div>
-          <div class="one-third column">
-            <center>Euclid-Class</center>
-          </div>
-          <div class="one-third column">
-            <center>Page 1/2</center>
-          </div>
-        </div>
-    </div>
+      } else if (e.keyCode == '39') {
+        //right
+        if (pageNumber < pages) {
+          switchPage(pageNumber + 1);
+        }
+      }
+
+    }
+  </script>
+  <div class="header">
     <div class="row">
-      <div class="two-thirds column">
-        <div id="page1">
-          <span class="label">Item Number:</span> <span class="data">{{title}}</span><br>
-          <span class="label">Object Class:</span> <span class="data">{{objectClass}}</span><br>
-          <span class="label">Special Containment Procedures:</span><br>
-          <span class="data tab">{{SCPs}}</span>
-        </div>
+      <div class="one-third column">
+        {{title}}
       </div>
-      <img class="one-third column" id="scp-image" src="" style="padding: 10px;">
+      <div class="one-third column">
+        <center>Euclid-Class</center>
+      </div>
+      <div class="one-third column">
+        <center>Page 1/2</center>
+      </div>
     </div>
+  </div>
+  <div class="row">
+    <div class="two-thirds column">
+      <div id="page1">
+        <span class="label">Item Number:</span> <span class="data">{{title}}</span><br>
+        <span class="label">Object Class:</span> <span class="data">{{objectClass}}</span><br>
+        <span class="label">Special Containment Procedures:</span><br>
+        <span class="data tab">{{SCPs}}</span>
+      </div>
+    </div>
+    <img class="one-third column" id="scp-image" src="" style="padding: 10px;">
+  </div>
 
-    <script>
+  <script>
     function replace(data) {
       console.log(data)
       var x = document.getElementsByTagName("div");
-      for(var i = 0; i < x.length; i++) {
-          var res = x[i].innerHTML.replace(/{{title}}/gi, data.title);
-          res = res.replace(/{{objectClass}}/gi, data.objectClass);
-          res = res.replace(/{{SCPs}}/gi, data.SCPs);
-          x[i].innerHTML = res;
+      for (var i = 0; i < x.length; i++) {
+        var res = x[i].innerHTML.replace(/{{title}}/gi, data.title);
+        res = res.replace(/{{objectClass}}/gi, data.objectClass);
+        res = res.replace(/{{SCPs}}/gi, data.SCPs);
+        x[i].innerHTML = res;
       }
     }
 
@@ -171,17 +175,21 @@
         document.getElementById("page" + i).style.display = "none";
       }
     }
+
     function showPage(page) {
       document.getElementById("page" + page).style.display = "block";
       pageNumber = page;
     }
+
     function hidePage(page) {
       document.getElementById("page" + page).style.display = "none";
     }
+
     function switchPage(page) {
       hidePage(pageNumber);
       showPage(page);
     }
-    </script>
-  </body>
+  </script>
+</body>
+
 </html>
