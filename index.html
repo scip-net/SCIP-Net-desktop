@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Hello World!</title>
+  <title>SCP:Net - Authenticated</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
   <!--<link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">-->
@@ -38,7 +38,7 @@
         if (!error) {
           var $ = cheerio.load(html);
 
-          var title, itemID, objectClass, image, imageCaption, points;
+          var title, itemID, objectClass, image, imageCaption, points, SCPsArray;
 
 
 
@@ -82,6 +82,9 @@
             scp = $('strong:contains("Special Containment Procedures:")')
             SCPs = scp.parent().text().replace(/Special Containment Procedures:/g, "");
 
+            SCPsArray = $('strong:contains("Special Containment Procedures:")').parent().nextUntil('strong < p').addBack();
+            console.log(SCPsArray);
+
             console.log("Object Class: " + objectClass)
             console.log("Page content: " + pageContent)
             console.log("Page Title: " + title)
@@ -96,7 +99,7 @@
           replace({
             title: title,
             objectClass: objectClass,
-            SCPs: SCPs
+            SCPsArray: SCPsArray
           });
           hideAll();
           showPage(1);
@@ -163,10 +166,14 @@
     function replace(data) {
       console.log(data)
       var x = document.getElementsByTagName("div");
+      var ContainmentText = "";
+      for (i in data.SCPsArray.children()) {
+        ContainmentText += data.SCPsArray.children(i).text + "<br>";
+      }
       for (var i = 0; i < x.length; i++) {
         var res = x[i].innerHTML.replace(/{{title}}/gi, data.title);
         res = res.replace(/{{objectClass}}/gi, data.objectClass);
-        res = res.replace(/{{SCPs}}/gi, data.SCPs);
+        res = res.replace(/{{SCPs}}/gi, ContainmentText);
         x[i].innerHTML = res;
       }
     }
