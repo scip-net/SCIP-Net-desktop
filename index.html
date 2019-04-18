@@ -12,9 +12,11 @@
   <link rel="stylesheet" href="./css/skeleton.css">
   <link rel="stylesheet" href="./css/landing.css">
   <link rel="stylesheet" href="./css/styling.css">
+
+  <script src="shell.js"></script>
 </head>
 
-<body class="crt">
+<body class="crt" onLoad='initShell();'>
   <script>
     // You can also require other files to run in this process
     require('./renderer.js')
@@ -84,14 +86,13 @@
             scp = $('strong:contains("Special Containment Procedures:")')
             SCPs = scp.parent().text().replace(/Special Containment Procedures:/g, "");
 
-            console.log("Object Class: " + objectClass)
-            console.log("Page content: " + pageContent)
-            console.log("Page Title: " + title)
-            console.log("Item ID: " + itemID)
-            console.log("Item Class: " + objectClass)
-            console.log("SpCoPrs: " + SCPs);
+            // console.log("Object Class: " + objectClass)
+            // console.log("Page content: " + pageContent)
+            // console.log("Page Title: " + title)
+            // console.log("Item ID: " + itemID)
+            // console.log("Item Class: " + objectClass)
+            // console.log("SpCoPrs: " + SCPs);
             // Once we have our title, we'll store it to the our json object.
-            //document.getElementById("title").innerHTML = title;
             //document.getElementById("title").innerHTML = title;
             //document.getElementById("objectClass").innerHTML = objectClass;
           })
@@ -105,7 +106,7 @@
         }
       })
     }
-    loadSCP();
+    // loadSCP();
 
     document.onkeydown = checkKey;
     var pages = 2;
@@ -146,8 +147,10 @@
       </div>
     </div>
   </div>
+
   <div class="row">
-    <div class="two-thirds column">
+    <div id='shell'></div>
+    <!-- <div class="two-thirds column">
       <div id="page1">
         <span class="label">Item Number:</span> <span class="data">{{title}}</span><br>
         <span class="label">Object Class:</span> <span class="data">{{objectClass}}</span><br>
@@ -155,9 +158,9 @@
         <span class="data tab">{{SCPs}}</span>
       </div>
     </div>
-    <img class="one-third column" id="scp-image" src="" style="padding: 10px;">
+    <img class="one-third column" id="scp-image" src="" style="padding: 10px;"> -->
   </div>
-
+  
   <script>
     function replace(data) {
       console.log(data)

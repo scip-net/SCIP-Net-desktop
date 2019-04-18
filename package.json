@@ -15,6 +15,7 @@
     "cheerio": "^1.0.0-rc.3",
     "express": "^4.16.4",
     "request": "^2.88.0",
-    "scpper.js": "^3.0.3"
+    "scpper.js": "^3.0.3",
+    "typed.js": "^2.0.10"
   }
 }
