@@ -3,22 +3,28 @@ var hostname = 'scip.net';
 var directory = '~';
 
 var prompt = username + '@' + hostname + ':' + directory + '$ ';
-var defaultHTML = "<span id='prompt'></span><input id='cmd' type='text' autofocus autocomplete='off' maxlength=85 onBlur='var e = this; setTimeout(function() { e.focus(); }, 0);' onKeyDown='readCommand(event);moveCursor(this.value.length, event)'>";
+var defaultHTML = "<span id='prompt'></span><input id='cmd' type='text' autofocus autocomplete='off' maxlength=85 onBlur='var e = this; setTimeout(function() { e.focus(); }, 0);' onKeyDown='readCommand(event);moveCursor(this.value.length, event)'><span id='caret' style='left:0'></span>";
+var cursor;
 
-// TODO
-// function moveCursor(count, e) {
-//     e = e || window.event;
-//     var keycode = e.keyCode || e.which;
-//     if(keycode == 37 && parseInt(cursor.style.left) >= (0-((count-1)*10))){
-//         cursor.style.left = parseInt(cursor.style.left) - 10 + "px";
-//     } else if(keycode == 39 && (parseInt(cursor.style.left) + 10) <= 0){
-//         cursor.style.left = parseInt(cursor.style.left) + 10 + "px";
-//     }
-// }
+function moveCursor(length, e) {
+	code = e.keyCode ? e.keyCode : e.charCode;
+	if (code == 8) {
+		if (length == 0) return;
+
+		cursor.style.left = parseInt(cursor.style.left) - 11 + "px";
+	} else {
+		var inp = String.fromCharCode(code);
+		if (/[a-zA-Z0-9-_ ]/.test(inp)) {
+			cursor.style.left = parseInt(cursor.style.left) + 11 + "px";
+		}
+	}
+}
 
 function refreshPrompt() {
 	prompt = username + '@' + hostname + ':' + directory + '$ ';
 	document.getElementById('prompt').innerHTMl = prompt;	
+
+	cursor = document.getElementById('caret'); // Reference the element again because it changed
 }
 
 function printPrompt(cmd, output) {
@@ -29,11 +35,13 @@ function printPrompt(cmd, output) {
 		}
 	} else {
 		line = '';
-    }
-    
+	}
+	
 	shell = document.getElementById('shell');
-    shell.innerHTML = shell.innerHTML.substring(0, shell.innerHTML.indexOf('<span')) + line + defaultHTML;
-    refreshPrompt();
+	shell.innerHTML = shell.innerHTML.substring(0, shell.innerHTML.indexOf('<span')) + line + defaultHTML;
+
+	refreshPrompt();
+	
 	document.getElementById('prompt').innerHTML = prompt;	
 	document.getElementById('cmd').focus();
 }
@@ -88,8 +96,8 @@ function initShell() {
 	document.title = 'Logged in as: ' + username;
 	document.getElementById('shell').innerHTML = defaultHTML;
 	document.getElementById('prompt').innerHTML = prompt;	
-    document.getElementById('cmd').focus();
-    cursor = document.getElementById('cursor');
+	document.getElementById('cmd').focus();
+	cursor = document.getElementById('caret');
 }
 
 function cleanHTMLChars(str) {

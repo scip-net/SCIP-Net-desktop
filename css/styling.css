@@ -19,9 +19,10 @@ html, body {
   padding: 0!important;
 	outline: none!important;
 	border: none!important;
-  width: 600px;
+  width: 200px;
   height: 25px!important;
   background-color: transparent!important;
+  caret-color: transparent;
 }
 
 #shell {
@@ -29,19 +30,19 @@ html, body {
   color: #bbb;
 }
 
-#prompt { position: relative; }
+#prompt {
+  position: relative;
+}
 
-#prompt::after {
-  content: '';
-  position: absolute;
-  top: -5px; right: -5px;
+#caret {
+  position: relative;
   display: inline-block;
   vertical-align: top;
+  margin-left: -200px; /* Width of input */
   width: 10px;
   height: 25px;
   background-color: rgb(197, 197, 197);
-  color: rgb(197, 197, 197);
-  animation: blink 1s step-end infinite;
+  animation: caret-blink 1s step-end infinite;
 }
 
 /* Content */
@@ -130,9 +131,10 @@ html, body {
   100% { background-position: 0px 25px; }
 }
 
-@keyframes blink {
+@keyframes caret-blink {
   0% { opacity: 1; }
   50% { opacity: 0; }
+  80% { opacity: 1; }
   100% { opacity: 1; }
 }
 
