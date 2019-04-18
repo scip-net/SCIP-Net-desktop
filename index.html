@@ -25,7 +25,7 @@
     var cheerio = require('cheerio');
     var loadSCP = function() {
       console.log("loading scp...")
-      //Hardcoding SCP-173 as the SCP to fetch for now
+      //Hardcoding SCP-049 as the SCP to fetch for now
       //// TODO: Implement dynamic SCP choice
       url = 'http://www.scp-wiki.net/scp-049';
 
@@ -110,7 +110,7 @@
     // loadSCP();
 
     document.onkeydown = checkKey;
-    
+
     var pages = 2;
     var pageNumber = 1;
 
@@ -132,7 +132,7 @@
       }
     }
   </script>
-  
+
   <div class="header">
     <div class="row">
       <div class="one-third column">
@@ -161,7 +161,7 @@
     </div>
     <img class="one-third column" id="scp-image" src="" style="padding: 10px;"> -->
   </div>
-  
+
   <script>
     document.getElementById("maxPages").innerHTML = pages;
     function replace(data) {
