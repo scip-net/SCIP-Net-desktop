@@ -3,53 +3,47 @@ var hostname = 'scip.net';
 var directory = '~';
 
 var prompt = username + '@' + hostname + ':' + directory + '$ ';
-var defaultHTML = "<span id='prompt'></span><input id='cmd' type='text' autofocus autocomplete='off' maxlength=85 onBlur='var e = this; setTimeout(function() { e.focus(); }, 0);' onKeyDown='readCommand(event);moveCursor(this.value.length, event)'><span id='caret' style='left:0'></span>";
+var defaultHTML = "<span id='prompt'></span><input id='cmd' type='text' autofocus autocomplete='off' maxlength=85 onBlur='var e = this; setTimeout(function() { e.focus(); }, 0);' onKeyDown='readCommand(event);moveCursor(this.value.length, event)'><span id='caret' style='left:0px'></span>";
 var cursor;
 
-var cursorPosition = 0;
 function moveCursor(length, e) {
-	//console.log("Before: "+cursorPosition, length)
 	code = e.keyCode ? e.keyCode : e.charCode;
+
+	console.log(cursor.style.left);
+	// if (cursor.style.left == "0px") return;
+
 	switch (code) {
-		case 8:
-			if (length == 0 && cursorPosition <= 0) return;
+		case 8: // Backspace
+			if (length == 0) return;
 
 			cursor.style.left = parseInt(cursor.style.left) - 11 + "px";
-			cursorPosition -= 1;
+			
 			break;
-		case 9:
-			return;
-			break;
-		case 37:
-			if (length == 0 || cursorPosition <= 0) return;
+		case 37: // Left arrow
+			if (cursor.style.left == "0px") return;
 
 			cursor.style.left = parseInt(cursor.style.left) - 11 + "px";
-			cursorPosition -= 1;
+
 			break;
-		case 39:
-			if (length == 0 || cursorPosition >= length) return;
+		case 39: // Right arrow
+			if (cursor.style.left == ((length * 11) + "px")) return;
 
 			cursor.style.left = parseInt(cursor.style.left) + 11 + "px";
-			cursorPosition += 1;
+		
 			break;
 		default:
 			var inp = String.fromCharCode(code);
 			if (/[a-zA-Z0-9-_ ]/.test(inp)) {
 				cursor.style.left = parseInt(cursor.style.left) + 11 + "px";
 			}
-			cursorPosition += 1;
+
 			break;
 	}
-	if(cursorPosition < 0) {
-		cursorPosition = 0;
-		cursor.style.left = parseInt(cursor.style.left) + 11 + "px";
-	}
-	//console.log("After: "+cursorPosition, length)
 }
 
 function refreshPrompt() {
 	prompt = username + '@' + hostname + ':' + directory + '$ ';
-	document.getElementById('prompt').innerHTMl = prompt;
+	document.getElementById('prompt').innerHTMl = prompt;	
 
 	cursor = document.getElementById('caret'); // Reference the element again because it changed
 }
@@ -63,20 +57,20 @@ function printPrompt(cmd, output) {
 	} else {
 		line = '';
 	}
-
+	
 	shell = document.getElementById('shell');
 	shell.innerHTML = shell.innerHTML.substring(0, shell.innerHTML.indexOf('<span')) + line + defaultHTML;
 
 	refreshPrompt();
-
-	document.getElementById('prompt').innerHTML = prompt;
+	
+	document.getElementById('prompt').innerHTML = prompt;	
 	document.getElementById('cmd').focus();
 }
 
 function executeCommand(cmd) {
 	args = cmd.split(' ');
     output = '';
-
+    
 	switch (args[0]) {
 		case 'help':
 			output += "---[SCPShell Available Commands]---\n";
@@ -84,26 +78,26 @@ function executeCommand(cmd) {
 			output += " clear&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Clear the screen.\n";
 			output += " pwd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Display the current working directory.\n";
 			output += " whoami&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Display the current logged in user.\n";
-
+			
 			break;
 		case 'clear':
             document.getElementById('shell').innerHTML = defaultHTML;
-
+            
 			break;
 		case 'pwd':
             output += directory.replace('~','/home/' + username);
-
+            
 			break;
 		case 'whoami':
             output += username;
-
+            
 			break;
 		default:
             output += args[0] + ': command does not exist';
-
+            
 			break;
     }
-
+    
 	return output.replace(/\n/g,'<br>');
 }
 
@@ -114,7 +108,7 @@ function readCommand(e) {
 			command = cleanHTMLChars(document.getElementById('cmd').value);
 			output = executeCommand(command);
 			printPrompt(command, output);
-
+            
 			break;
 	}
 }
@@ -122,7 +116,7 @@ function readCommand(e) {
 function initShell() {
 	document.title = 'Logged in as: ' + username;
 	document.getElementById('shell').innerHTML = defaultHTML;
-	document.getElementById('prompt').innerHTML = prompt;
+	document.getElementById('prompt').innerHTML = prompt;	
 	document.getElementById('cmd').focus();
 	cursor = document.getElementById('caret');
 }
