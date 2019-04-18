@@ -17,7 +17,7 @@ function createWindow() {
     frame: false,
     fullscreen: false,
     backgroundColor: '#000000',
-    icon: "./images/scplogo.png"
+    icon: "./assets/scplogo.png"
   })
 
   // and load the index.html of the app.
