@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Hello World!</title>
+  <title>SCP:Net - Authenticated</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
   <!--<link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">-->
@@ -25,7 +25,9 @@
     var cheerio = require('cheerio');
     var loadSCP = function() {
       console.log("loading scp...")
-      url = 'http://www.scp-wiki.net/scp-173';
+      //Hardcoding SCP-173 as the SCP to fetch for now
+      //// TODO: Implement dynamic SCP choice
+      url = 'http://www.scp-wiki.net/scp-049';
 
       // The structure of our request call
       // The first parameter is our URL
@@ -37,18 +39,14 @@
         if (!error) {
           var $ = cheerio.load(html);
 
-          var title, itemID, objectClass, image, imageCaption, points;
+          var title, itemID, objectClass, image, imageCaption, points, SCPsArray;
 
-          // We'll use the unique header class as a starting point.
 
-          $('.scp-image-block').filter(function() {
-            var data = $(this);
 
-            image = data.children().first().attr('src');
-            imageCaption = data.children().first().next().text();
-            console.log("Image url: " + image)
-            document.getElementById('scp-image').src = image;
-          })
+          image = $('.scp-image-block').find(".image").attr('src');
+          //imageCaption = data.children().first().next().text();
+          console.log("Image url: " + image)
+          document.getElementById('scp-image').src = image;
 
           $('.rate-points').filter(function() {
             var data = $(this);
@@ -84,12 +82,16 @@
             scp = $('strong:contains("Special Containment Procedures:")')
             SCPs = scp.parent().text().replace(/Special Containment Procedures:/g, "");
 
-            // console.log("Object Class: " + objectClass)
-            // console.log("Page content: " + pageContent)
-            // console.log("Page Title: " + title)
-            // console.log("Item ID: " + itemID)
-            // console.log("Item Class: " + objectClass)
-            // console.log("SpCoPrs: " + SCPs);
+            SCPsArray = $('strong:contains("Special Containment Procedures:")').parent().nextUntil('strong < p').addBack();
+            console.log(SCPsArray);
+
+            console.log("Object Class: " + objectClass)
+            console.log("Page content: " + pageContent)
+            console.log("Page Title: " + title)
+            console.log("Item ID: " + itemID)
+            console.log("Item Class: " + objectClass)
+            console.log("SpCoPrs: " + SCPs);
+
             // Once we have our title, we'll store it to the our json object.
             //document.getElementById("title").innerHTML = title;
             //document.getElementById("objectClass").innerHTML = objectClass;
@@ -97,7 +99,7 @@
           replace({
             title: title,
             objectClass: objectClass,
-            SCPs: SCPs
+            SCPsArray: SCPsArray
           });
 
           hideAll();
@@ -140,7 +142,7 @@
         <center>Euclid-Class</center>
       </div>
       <div class="one-third column">
-        <center>Page 1/2</center>
+        <center>Page <span id="currentPage"></span>/<span id="maxPages"></span></center>
       </div>
     </div>
   </div>
@@ -151,6 +153,8 @@
       <div id="page1">
         <span class="label">Item Number:</span> <span class="data">{{title}}</span><br>
         <span class="label">Object Class:</span> <span class="data">{{objectClass}}</span><br>
+      </div>
+      <div id="page2">
         <span class="label">Special Containment Procedures:</span><br>
         <span class="data tab">{{SCPs}}</span>
       </div>
@@ -159,26 +163,32 @@
   </div>
   
   <script>
+    document.getElementById("maxPages").innerHTML = pages;
     function replace(data) {
       console.log(data)
       var x = document.getElementsByTagName("div");
+      var ContainmentText = "";
+      for (i in data.SCPsArray.children()) {
+        ContainmentText += data.SCPsArray.children(i).text + "<br>";
+      }
       for (var i = 0; i < x.length; i++) {
         var res = x[i].innerHTML.replace(/{{title}}/gi, data.title);
         res = res.replace(/{{objectClass}}/gi, data.objectClass);
-        res = res.replace(/{{SCPs}}/gi, data.SCPs);
+        res = res.replace(/{{SCPs}}/gi, ContainmentText);
         x[i].innerHTML = res;
       }
     }
 
     function hideAll() {
       for (var i = 1; i < pages; i++) {
-        document.getElementById("page" + i).style.display = "none";
+        document.getElementById("page" + (i + 1)).style.display = "none";
       }
     }
 
     function showPage(page) {
       document.getElementById("page" + page).style.display = "block";
       pageNumber = page;
+      document.getElementById("currentPage").innerHTML = pageNumber;
     }
 
     function hidePage(page) {
@@ -186,6 +196,7 @@
     }
 
     function switchPage(page) {
+      console.log(pageNumber, page)
       hidePage(pageNumber);
       showPage(page);
     }
