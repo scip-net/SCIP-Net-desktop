@@ -12,6 +12,10 @@ html, body {
   src: url('../cerbetica/cerbetica_regular.ttf');
 } */
 
+#startup {
+  margin-top: 30px;
+}
+
 /* Shell */
 
 #cmd {
@@ -53,6 +57,7 @@ html, body {
 /* Content */
 
 .header {
+  display: none;
   position: absolute;
   height: 25px;
   width: 100%;

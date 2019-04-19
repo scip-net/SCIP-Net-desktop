@@ -1,65 +1,71 @@
-var username = 'researcher';
-var hostname = 'scip.net';
-var directory = '~';
+var defaultHTML = "<span id='prompt'></span><span id='typer'></span><input id='cmd' type='text' autofocus autocomplete='off' onBlur='var e = this; setTimeout(function() { e.focus(); }, 0);' onkeydown='shell.read(event);shell.updateTyper(this.value, event);'><span id='caret' style='left:0px'></span>";
 
-var prompt = username + '@' + hostname + ':' + directory + '$ ';
-var defaultHTML = "<span id='prompt'></span><span id='typer'></span><input id='cmd' type='text' autofocus autocomplete='off' onBlur='var e = this; setTimeout(function() { e.focus(); }, 0);' onkeydown='readCommand(event);updateTyper(this.value, event);'><span id='caret' style='left:0px'></span>";
+shell = {
+	letterSpacing: 11,
+	cursorPosition: 0,
+	username: 'researcher',
+	hostname: 'scip.net',
+	shellElem: null,
+	commandElem: null,
+	cursor: null,
+	typer: null
+};
+shell.promptText = shell.username + '@' + shell.hostname + '> ';
 
-var cursor;
-var typer;
-var cursorPosition = 0;
-var letterSpacing = 11;
-
-function updateTyper(value, e) {
+shell.updateTyper = function(value, e) {
 	code = e.keyCode ? e.keyCode : e.charCode;
-	if (code == 13) return;
+	if (code == 13)/*Enter*/ return;
 
 	var length = value.length;
-	typer.innerHTML = value;
+	shell.typer.innerHTML = value;
 
+	// TODO: "Del" key
 	switch (code) {
 		case 8: // Backspace
-			if (length == 0) return;
+			if (length == 0) return; // No characters to delete.
 
-			cursorPosition--;
+			shell.cursorPosition--;
 			break;
 		case 37: // Left arrow
-			if (cursorPosition == 0) return;
+			if (shell.cursorPosition == 0) return; // Reached beginning of message.
 
-			cursor.style.left = parseInt(cursor.style.left) - letterSpacing + "px";
-			cursorPosition--;
+			shell.cursor.style.left = parseInt(shell.cursor.style.left) - shell.letterSpacing + "px";
+			shell.cursorPosition--;
 			break;
 		case 39: // Right arrow
-			if (cursorPosition == length) return;
+			if (shell.cursorPosition == length) return; // Reached end of message.
 
-			cursor.style.left = parseInt(cursor.style.left) + letterSpacing + "px";
-			cursorPosition++;
+			shell.cursor.style.left = parseInt(shell.cursor.style.left) + shell.letterSpacing + "px";
+			shell.cursorPosition++;
 			break;
 		default:
+			// Since we are handling the keydown event, the handler will be called before the key
+			// has been released, and the character typed into the text field. This creates a
+			// difference of one character between the text field and the typer.
+			// This compensates for that.
 			if((code >= 65 && code <= 120) /*a-z 0-9 NumPad*/
 			|| (code >= 186 && code <= 192) /*,./`-=*/
 			|| (code >= 219 && code <= 222) /*[];'\*/
 			|| code == 226) { /*\*/
-				typer.innerHTML = typer.innerHTML.slice(0, cursorPosition) + e.key + typer.innerHTML.slice(cursorPosition, typer.innerHTML.length);
-				cursorPosition++;
+				typer.innerHTML = shell.typer.innerHTML.slice(0, shell.cursorPosition) + e.key + shell.typer.innerHTML.slice(shell.cursorPosition, shell.typer.innerHTML.length);
+				shell.cursorPosition++;
 			}
 			break;
 	}
 }
 
-function refreshPrompt() {
-	prompt = username + '@' + hostname + ':' + directory + '$ ';
-	document.getElementById('prompt').innerHTMl = prompt;	
+shell.refresh = function() {
+	document.getElementById('prompt').innerHTML = shell.promptText;
 
-	cursor = document.getElementById('caret');
-	typer = document.getElementById('typer');
-	typer.innerHTML = '';
-	cursorPosition = 0;
+	shell.commandElem = document.getElementById('cmd');
+	shell.commandElem.focus();
+
+	shell.cursor = document.getElementById('caret');
 }
 
-function printPrompt(cmd, output) {
-	if (cmd && cmd != 'clear') {
-		line = prompt + cmd + '<br>';
+shell.print = function(command, output) {
+	if (command && command != 'clear') {
+		line = shell.promptText + command + '<br>';
 		if (output) {
 			line += output + '<br>';
 		}
@@ -67,17 +73,16 @@ function printPrompt(cmd, output) {
 		line = '';
 	}
 	
-	shell = document.getElementById('shell');
-	shell.innerHTML = shell.innerHTML.substring(0, shell.innerHTML.indexOf('<span')) + line + defaultHTML;
+	shell.shellElem.innerHTML = shell.shellElem.innerHTML.substring(0, shell.shellElem.innerHTML.indexOf('<span')) + line + defaultHTML;
 
-	refreshPrompt();
-	
-	document.getElementById('prompt').innerHTML = prompt;	
-	document.getElementById('cmd').focus();
+	shell.refresh();
+
+	shell.cursorPosition = 0;
+	shell.typer.innerHTML = '';
 }
 
-function executeCommand(cmd) {
-	args = cmd.split(' ');
+shell.execute = function(command) {
+	args = command.split(' ');
     output = '';
     
 	switch (args[0]) {
@@ -86,52 +91,131 @@ function executeCommand(cmd) {
 			output += " help&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Display this page.\n";
 			output += " clear&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Clear the screen.\n";
 			output += " pwd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Display the current working directory.\n";
-			output += " whoami&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Display the current logged in user.\n";
+			output += " whoami&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Display the current user.\n";
 			
 			break;
 		case 'clear':
-            document.getElementById('shell').innerHTML = defaultHTML;
+            shell.shellElem.innerHTML = defaultHTML;
             
 			break;
 		case 'pwd':
-            output += directory.replace('~','/home/' + username);
+            output += directory.replace('~','/home/' + shell.username);
             
 			break;
 		case 'whoami':
-            output += username;
+            output += shell.username;
             
 			break;
 		default:
-            output += args[0] + ': command does not exist';
+            output += 'Unknown command: ' + args[0];
             
 			break;
     }
-    
 	return output.replace(/\n/g,'<br>');
 }
 
-function readCommand(e) {
+shell.read = function(e) {
 	code = e.keyCode ? e.keyCode : e.charCode;
-	switch (code) {
-		case 13: // Enter
-			command = cleanHTMLChars(document.getElementById('cmd').value);
-			output = executeCommand(command);
-			printPrompt(command, output);
-            
-			break;
+	if (code == 13) { // Enter
+		command = cleanHTMLChars(cmd.value);
+		output = shell.execute(command);
+		shell.print(command, output);
 	}
 }
 
 function initShell() {
-	document.title = 'Logged in as: ' + username;
-	document.getElementById('shell').innerHTML = defaultHTML;
-	document.getElementById('prompt').innerHTML = prompt;	
-	document.getElementById('cmd').focus();
+	boot.innerHTML = '';
+	document.getElementById('header').style.display = 'block';
 
-	cursor = document.getElementById('caret');
-	typer = document.getElementById('typer');
+	document.title = 'Logged in as: ' + shell.username;
+
+	shell.shellElem = document.getElementById('shell');
+	shell.shellElem.innerHTML = defaultHTML;
+
+	shell.refresh();
+	shell.typer = document.getElementById('typer');
 }
 
 function cleanHTMLChars(str) {
 	return str.replace(/</g, '&lt;').replace(/\>/g, '&gt;');
+}
+
+// Loading sequence
+
+var boot;
+var defaultDelay = 200;
+var charDelay = 15;
+
+var messages = [
+	{text: "Preparing boot procedure...", delay: 1000},
+	{text: "===INITIATING STARTUP===", delay: 1000},
+	[{text: "Verifying local filesystems.... ", delay: 800}, {text: "done", delay: 300}],
+	[{text: "Enabling device drivers.... ", delay: 1200}, {text: "done", delay: 300}],
+	{text: "| akclac", delay: 500},
+	{text: "| acjhasbd", delay: 200},
+	{text: "| pfjofp", delay: 300},
+	{text: "| dklb", delay: 500},
+	[{text: "…", delay: 200}, {text: "…", delay: 300}, {text: "…", delay: 500}, {text: "…", delay: 700}, {text: "…", delay: 200}, {text: "…", delay: 200}],
+	[{text: "Checking service protocol.... ", delay: 1200}, {text: "done", delay: 300}],
+	{text: "Boot complete", delay: 500},
+];
+
+function typeBootChar(text, callback, i, span) {
+	span.innerHTML += text.charAt(i);
+	boot.appendChild(span);
+
+	if (++i < text.length) {
+		setTimeout(function() {
+			typeBootChar(text, callback, i, span);
+		}, charDelay);
+	} else {
+		callback();
+	}
+}
+  
+function displayBootMessage(message, subMessageId) {
+	var messageId = message;
+	var message = messages[messageId];
+	
+	var length = 0;
+
+	if (Object.prototype.toString.call(message) == "[object Array]") {
+		length = message.length;
+		message = message[subMessageId];
+
+		subMessageId++;
+	}
+	var text = message.text;
+	var delay = message.delay;
+
+	if (typeof text == "undefined") {
+		messageId++;
+		subMessageId = 0;
+		if (messageId < messages.length) {
+			setTimeout(function() {displayBootMessage(messageId, subMessageId)}, delay);
+		}
+		return;
+	}
+	
+	var span = document.createElement("span");
+
+	typeBootChar(text, function() {
+		if (subMessageId >= length) {
+			boot.appendChild(document.createElement('br'));
+			messageId++;
+			if (subMessageId == length && messageId == messages.length) {
+				initShell();
+			}
+			subMessageId = 0;
+		}
+		if (messageId < messages.length) {
+			setTimeout(function() {displayBootMessage(messageId, subMessageId)}, delay);
+		}
+	}, 0, span);
+}
+
+function initLoadingSequence() {
+	boot = document.getElementById('boot');
+
+	displayBootMessage(0, 0);
 }

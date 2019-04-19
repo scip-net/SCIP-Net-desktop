@@ -16,7 +16,7 @@
   <script src="shell.js"></script>
 </head>
 
-<body class="crt" onLoad='initShell();'>
+<body class="crt" onLoad='initLoadingSequence();refreshClock()'>
   <script>
     // You can also require other files to run in this process
     require('./renderer.js')
@@ -131,21 +131,23 @@
     }
   </script>
 
-  <div class="header">
+  <div class="header" id="header">
     <div class="row">
-      <div class="one-third column">
-        {{title}}
+      <div class="one-third column" id="login">
+        User:
       </div>
       <div class="one-third column">
-        <center>Euclid-Class</center>
+        <center>SCIP Shell</center>
       </div>
-      <div class="one-third column">
-        <center>Page <span id="currentPage"></span>/<span id="maxPages"></span></center>
+      <div class="one-third column" id="clock">
+        <center>00:00</center>
+        <!-- <center>Page <span id="currentPage"></span>/<span id="maxPages"></span></center> -->
       </div>
     </div>
   </div>
 
   <div class="row">
+    <div id="boot"></div>
     <div id='shell'></div>
     <!-- <div class="two-thirds column">
       <div id="page1">
@@ -161,7 +163,23 @@
   </div>
 
   <script>
-    document.getElementById("maxPages").innerHTML = pages;
+    function refreshClock() {
+      var date = new Date();
+      var m = checkTime(date.getHours());
+      var s = checkTime(date.getMinutes());
+      document.getElementById('clock').innerHTML = '<center>' + m + ":" + s + '</center>';
+      
+      setTimeout(refreshClock, 500);
+    }
+
+    function checkTime(i) {
+      if (i < 10) i = '0' + i; // Add zero in front if < 10
+      return i;
+    }
+
+	  document.getElementById('login').innerHTML += shell.username;
+
+    // document.getElementById("maxPages").innerHTML = pages;
     function replace(data) {
       console.log(data)
       var x = document.getElementsByTagName("div");

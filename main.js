@@ -15,7 +15,7 @@ function createWindow() {
       nodeIntegration: true
     },
     frame: false,
-    fullscreen: false,
+    fullscreen: true,
     backgroundColor: '#000000',
     icon: "./assets/scplogo.png"
   })
