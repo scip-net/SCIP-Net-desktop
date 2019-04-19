@@ -3,40 +3,46 @@ var hostname = 'scip.net';
 var directory = '~';
 
 var prompt = username + '@' + hostname + ':' + directory + '$ ';
-var defaultHTML = "<span id='prompt'></span><input id='cmd' type='text' autofocus autocomplete='off' maxlength=85 onBlur='var e = this; setTimeout(function() { e.focus(); }, 0);' onKeyDown='readCommand(event);moveCursor(this.value.length, event)'><span id='caret' style='left:0px'></span>";
+var defaultHTML = "<span id='prompt'></span><span id='typer'></span><input id='cmd' type='text' autofocus autocomplete='off' onBlur='var e = this; setTimeout(function() { e.focus(); }, 0);' onkeydown='readCommand(event);updateTyper(this.value, event);'><span id='caret' style='left:0px'></span>";
+
 var cursor;
+var typer;
+var cursorPosition = 0;
+var letterSpacing = 11;
 
-function moveCursor(length, e) {
+function updateTyper(value, e) {
 	code = e.keyCode ? e.keyCode : e.charCode;
+	if (code == 13) return;
 
-	console.log(cursor.style.left);
-	// if (cursor.style.left == "0px") return;
+	var length = value.length;
+	typer.innerHTML = value;
 
 	switch (code) {
 		case 8: // Backspace
 			if (length == 0) return;
 
-			cursor.style.left = parseInt(cursor.style.left) - 11 + "px";
-			
+			cursorPosition--;
 			break;
 		case 37: // Left arrow
-			if (cursor.style.left == "0px") return;
+			if (cursorPosition == 0) return;
 
-			cursor.style.left = parseInt(cursor.style.left) - 11 + "px";
-
+			cursor.style.left = parseInt(cursor.style.left) - letterSpacing + "px";
+			cursorPosition--;
 			break;
 		case 39: // Right arrow
-			if (cursor.style.left == ((length * 11) + "px")) return;
+			if (cursorPosition == length) return;
 
-			cursor.style.left = parseInt(cursor.style.left) + 11 + "px";
-		
+			cursor.style.left = parseInt(cursor.style.left) + letterSpacing + "px";
+			cursorPosition++;
 			break;
 		default:
-			var inp = String.fromCharCode(code);
-			if (/[a-zA-Z0-9-_ ]/.test(inp)) {
-				cursor.style.left = parseInt(cursor.style.left) + 11 + "px";
+			if((code >= 65 && code <= 120) /*a-z 0-9 NumPad*/
+			|| (code >= 186 && code <= 192) /*,./`-=*/
+			|| (code >= 219 && code <= 222) /*[];'\*/
+			|| code == 226) { /*\*/
+				typer.innerHTML = typer.innerHTML.slice(0, cursorPosition) + e.key + typer.innerHTML.slice(cursorPosition, typer.innerHTML.length);
+				cursorPosition++;
 			}
-
 			break;
 	}
 }
@@ -45,7 +51,10 @@ function refreshPrompt() {
 	prompt = username + '@' + hostname + ':' + directory + '$ ';
 	document.getElementById('prompt').innerHTMl = prompt;	
 
-	cursor = document.getElementById('caret'); // Reference the element again because it changed
+	cursor = document.getElementById('caret');
+	typer = document.getElementById('typer');
+	typer.innerHTML = '';
+	cursorPosition = 0;
 }
 
 function printPrompt(cmd, output) {
@@ -118,7 +127,9 @@ function initShell() {
 	document.getElementById('shell').innerHTML = defaultHTML;
 	document.getElementById('prompt').innerHTML = prompt;	
 	document.getElementById('cmd').focus();
+
 	cursor = document.getElementById('caret');
+	typer = document.getElementById('typer');
 }
 
 function cleanHTMLChars(str) {

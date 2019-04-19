@@ -15,14 +15,20 @@ html, body {
 /* Shell */
 
 #cmd {
+  opacity: 0!important;
   margin: 0!important;
   padding: 0!important;
-	outline: none!important;
+  height: 25px!important;
+  width: 0;
+	/* outline: none!important;
 	border: none!important;
   width: 200px;
-  height: 25px!important;
-  background-color: transparent!important;
-  caret-color: transparent;
+  background-color: red!important;
+  caret-color: transparent; */
+}
+
+#typer {
+  word-wrap: break-word;
 }
 
 #shell {
@@ -38,7 +44,6 @@ html, body {
   position: relative;
   display: inline-block;
   vertical-align: top;
-  margin-left: -200px; /* Width of input */
   width: 10px;
   height: 25px;
   background-color: rgb(197, 197, 197);
