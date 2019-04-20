@@ -12,11 +12,19 @@ html, body {
   src: url('../cerbetica/cerbetica_regular.ttf');
 } */
 
-#startup {
-  margin-top: 30px;
-}
-
 /* Shell */
+
+.interfaceButton {
+  display: inline-block;
+  background-color: orange;
+  width: 100px;
+  height: 40px;
+  margin: 15px 10px;
+  color: black;
+  text-align: center;
+  line-height: 40px;
+  font-size: 14px;
+}
 
 #cmd {
   opacity: 0!important;
@@ -36,6 +44,7 @@ html, body {
 }
 
 #shell {
+  white-space: pre-wrap;
   margin-top: 30px;
   color: #bbb;
 }

@@ -35,7 +35,6 @@
 
       request(url, function(error, response, html) {
         // First we'll check to make sure no errors occurred when making the request
-
         if (!error) {
           var $ = cheerio.load(html);
 
@@ -46,21 +45,21 @@
           console.log("Image url: " + image)
           document.getElementById('scp-image').src = image;
 
-          $('.rate-points').filter(function() {
-            var data = $(this);
+          // $('.rate-points').filter(function() {
+          //   var data = $(this);
 
-            points = data.children().first().text();
+          //   points = data.children().first().text();
 
-            //document.getElementById("rating").innerHTML = points;
-          })
+          //   //document.getElementById("rating").innerHTML = points;
+          // })
 
-          $('#page-title').filter(function() {
-            var data = $(this);
+          // $('#page-title').filter(function() {
+          //   var data = $(this);
 
-            title = data.text();
+          //   title = data.text();
 
-            //document.getElementById("rating").innerHTML = points;
-          })
+          //   //document.getElementById("rating").innerHTML = points;
+          // })
 
           $('#main-content').filter(function() {
             // Let's store the data we filter into a variable so we can easily see what's going on.

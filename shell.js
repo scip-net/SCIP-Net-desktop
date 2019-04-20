@@ -1,6 +1,7 @@
 var defaultHTML = "<span id='prompt'></span><span id='typer'></span><input id='cmd' type='text' autofocus autocomplete='off' onBlur='var e = this; setTimeout(function() { e.focus(); }, 0);' onkeydown='shell.read(event);shell.updateTyper(this.value, event);'><span id='caret' style='left:0px'></span>";
 
 shell = {
+	state: 0,
 	letterSpacing: 11,
 	cursorPosition: 0,
 	username: 'researcher',
@@ -43,10 +44,12 @@ shell.updateTyper = function(value, e) {
 			// has been released, and the character typed into the text field. This creates a
 			// difference of one character between the text field and the typer.
 			// This compensates for that.
-			if((code >= 65 && code <= 120) /*a-z 0-9 NumPad*/
+			if(code == 32 /*space*/
+			|| (code >= 48 && code <= 57) /*0-9*/
+			|| (code >= 65 && code <= 120) /*a-z*/
 			|| (code >= 186 && code <= 192) /*,./`-=*/
 			|| (code >= 219 && code <= 222) /*[];'\*/
-			|| code == 226) { /*\*/
+			|| code == 226) { /*other \*/
 				typer.innerHTML = shell.typer.innerHTML.slice(0, shell.cursorPosition) + e.key + shell.typer.innerHTML.slice(shell.cursorPosition, shell.typer.innerHTML.length);
 				shell.cursorPosition++;
 			}
@@ -81,6 +84,28 @@ shell.print = function(command, output) {
 	shell.typer.innerHTML = '';
 }
 
+shell.executeViewerIntCommand = function(command) {
+	args = command.split(' ');
+    output = '';
+    
+	switch (args[0]) {
+		case 'exit':
+		case 'quit':
+		case 'q':
+			shell.promptText = shell.username + '@' + shell.hostname + '> ';
+			shell.state = 0;
+			document.getElementById('prompt').innerHTML = shell.promptText;
+			document.getElementById('header').style.backgroundColor = 'green';
+
+			break;
+		default:
+            output += 'Unknown input ' + args[0];
+            
+			break;
+    }
+	return output;
+}
+
 shell.execute = function(command) {
 	args = command.split(' ');
     output = '';
@@ -95,7 +120,8 @@ shell.execute = function(command) {
 			
 			break;
 		case 'clear':
-            shell.shellElem.innerHTML = defaultHTML;
+			shell.shellElem.innerHTML = defaultHTML;
+			shell.refresh();
             
 			break;
 		case 'pwd':
@@ -106,6 +132,15 @@ shell.execute = function(command) {
             output += shell.username;
             
 			break;
+		case 'scp':
+			if (args.length == 3 && args[1] == '-n') {
+				fetchSCP(args[2]);
+			} else {
+				output += "Invalid arguments.\n";
+				output += "-n &nbsp;&nbsp;&nbsp;Specify the item ID to fetch\n";
+			}
+
+			break;
 		default:
             output += 'Unknown command: ' + args[0];
             
@@ -114,12 +149,51 @@ shell.execute = function(command) {
 	return output.replace(/\n/g,'<br>');
 }
 
+function fetchSCP(id) {
+	url = 'http://www.scp-wiki.net/scp-' + id;
+
+	var itemID, objectClass, SCPsArray;
+	request(url, function(error, response, html) {
+		if (!error) {
+			var $ = cheerio.load(html);
+
+			oClass = $('strong:contains("Object Class:")')
+			objectClass = oClass.parent().text().replace(/Object Class:/g, '');
+
+			scp = $('strong:contains("Special Containment Procedures:")')
+			SCPs = scp.parent().text().replace(/Special Containment Procedures:/g, '');
+
+			SCPsArray = $('strong:contains("Special Containment Procedures:")').parent().nextUntil('strong < p').addBack();
+			
+			output += "Subject class:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>" + objectClass + "</strong><br>";
+			output += "Subject number:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>" + id + "</strong><br><br>";
+			output += "Special Containment Procedures: <strong>[]</strong><br>";
+			output += "<div class='interfaceButton'>q: quit</div>";
+			output += "<div class='interfaceButton'>n: next</div>";
+			output += "<div class='interfaceButton'>p: prev</div>";
+
+			shell.print('scp -n ' + id, output);
+			shell.promptText = ':';
+			shell.state = 1;
+			document.getElementById('prompt').innerHTML = shell.promptText;
+			document.getElementById('header').style.backgroundColor = 'orange';
+		}
+	});
+}
+
 shell.read = function(e) {
 	code = e.keyCode ? e.keyCode : e.charCode;
 	if (code == 13) { // Enter
 		command = cleanHTMLChars(cmd.value);
-		output = shell.execute(command);
-		shell.print(command, output);
+		if (shell.state == 1) { // SCP Viewer interface
+			output = shell.executeViewerIntCommand(command);
+			shell.print(command, output);
+		} else {
+			output = shell.execute(command);
+
+			if (output)
+				shell.print(command, output);
+		}
 	}
 }
 
@@ -143,7 +217,6 @@ function cleanHTMLChars(str) {
 // Loading sequence
 
 var boot;
-var defaultDelay = 200;
 var charDelay = 15;
 
 var messages = [
@@ -205,6 +278,7 @@ function displayBootMessage(message, subMessageId) {
 			messageId++;
 			if (subMessageId == length && messageId == messages.length) {
 				initShell();
+				return;
 			}
 			subMessageId = 0;
 		}
@@ -217,5 +291,6 @@ function displayBootMessage(message, subMessageId) {
 function initLoadingSequence() {
 	boot = document.getElementById('boot');
 
-	displayBootMessage(0, 0);
+	initShell();
+	// displayBootMessage(0, 0);
 }
