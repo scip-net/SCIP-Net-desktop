@@ -23,9 +23,10 @@ shell.updateTyper = function(value, e) {
 	// TODO: "Del" key
 	switch (code) {
 		case 8: // Backspace
-			if (length == 0) return; // No characters to delete.
+			if (length == 0 || shell.cursorPosition == 0) return; // No characters to delete.
 
 			shell.cursorPosition--;
+			shell.typer.innerHTML = shell.typer.innerHTML.slice(0, shell.cursorPosition) + shell.typer.innerHTML.slice(shell.cursorPosition + 1);
 			break;
 		case 37: // Left arrow
 			if (shell.cursorPosition == 0) return; // Reached beginning of message.
@@ -64,6 +65,7 @@ shell.refresh = function() {
 	shell.commandElem.focus();
 
 	shell.cursor = document.getElementById('caret');
+	shell.typer = document.getElementById('typer');
 }
 
 shell.print = function(command, output) {
@@ -96,7 +98,10 @@ shell.executeViewerIntCommand = function(command) {
 			shell.state = 0;
 			document.getElementById('prompt').innerHTML = shell.promptText;
 			document.getElementById('header').style.backgroundColor = 'green';
-
+			document.getElementById('headerTitle').innerHTML = '<center>SCIP Shell</center>';
+			document.getElementById('headerTitle').innerHTML = '<center>SCIP Shell</center>';
+			document.getElementById('crt').style.backgroundImage = "url(assets/logo-green.png)";
+			
 			break;
 		default:
             output += 'Unknown input ' + args[0];
@@ -152,7 +157,6 @@ shell.execute = function(command) {
 function fetchSCP(id) {
 	url = 'http://www.scp-wiki.net/scp-' + id;
 
-	var itemID, objectClass, SCPsArray;
 	request(url, function(error, response, html) {
 		if (!error) {
 			var $ = cheerio.load(html);
@@ -177,6 +181,8 @@ function fetchSCP(id) {
 			shell.state = 1;
 			document.getElementById('prompt').innerHTML = shell.promptText;
 			document.getElementById('header').style.backgroundColor = 'orange';
+			document.getElementById('headerTitle').innerHTML = '<center>SCP Viewer Interface</center>';
+			document.getElementById('crt').style.backgroundImage = "url(assets/logo-orange.png)";
 		}
 	});
 }

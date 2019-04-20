@@ -161,7 +161,7 @@ html, body {
 
 .crt {
   user-select: none;
-  background: url("../assets/logo.png") no-repeat;
+  background: url("../assets/logo-green.png") no-repeat;
   background-position: center 90%;
   background-color: #111;
   background-size: 15%;
