@@ -49,6 +49,15 @@ html, body {
   color: #bbb;
 }
 
+#shell .red, #shell .lightcyan, #shell .darkcyan, #shell .lightyellow {
+  display: inline;
+}
+
+#shell .lightyellow { color: #FBA922; }
+#shell .red { color: #DC322F; }
+#shell .lightcyan { color: #3FD1C6; }
+#shell .darkcyan { color: #23867F; }
+
 #prompt {
   position: relative;
 }
@@ -72,6 +81,10 @@ html, body {
   width: 100%;
   background-color: green;
   color: black;
+}
+
+#header.scpViewer {
+  background-color: orange;
 }
 
 .label {
@@ -190,4 +203,8 @@ html, body {
   background-size: 100% 2px, 3px 100%;
   pointer-events: none;
   z-index: 2;
+}
+
+.crt.scpViewer {
+  background-image: url("../assets/logo-orange.png");
 }

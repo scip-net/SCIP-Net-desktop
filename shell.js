@@ -23,10 +23,10 @@ shell.updateTyper = function(value, e) {
 	// TODO: "Del" key
 	switch (code) {
 		case 8: // Backspace
-			if (length == 0 || shell.cursorPosition == 0) return; // No characters to delete.
-
-			shell.cursorPosition--;
+			if (length == 0 || shell.cursorPosition) return; // No characters to delete.
+			
 			shell.typer.innerHTML = shell.typer.innerHTML.slice(0, shell.cursorPosition) + shell.typer.innerHTML.slice(shell.cursorPosition + 1);
+			shell.cursorPosition--;
 			break;
 		case 37: // Left arrow
 			if (shell.cursorPosition == 0) return; // Reached beginning of message.
@@ -96,19 +96,18 @@ shell.executeViewerIntCommand = function(command) {
 		case 'q':
 			shell.promptText = shell.username + '@' + shell.hostname + '> ';
 			shell.state = 0;
+			document.getElementById('headerTitle').innerHTML = '<center>SCIP Shell</center>';
 			document.getElementById('prompt').innerHTML = shell.promptText;
-			document.getElementById('header').style.backgroundColor = 'green';
-			document.getElementById('headerTitle').innerHTML = '<center>SCIP Shell</center>';
-			document.getElementById('headerTitle').innerHTML = '<center>SCIP Shell</center>';
-			document.getElementById('crt').style.backgroundImage = "url(assets/logo-green.png)";
+			document.getElementById('header').classList.remove('scpViewer');
+			document.getElementById('crt').classList.remove('scpViewer');
 			
 			break;
 		default:
-            output += 'Unknown input ' + args[0];
+            output += '<red>Unknown input:</> ' + args[0];
             
 			break;
-    }
-	return output;
+	}
+	return replaceFormattingTags(output);
 }
 
 shell.execute = function(command) {
@@ -117,11 +116,10 @@ shell.execute = function(command) {
     
 	switch (args[0]) {
 		case 'help':
-			output += "---[SCPShell Available Commands]---\n";
-			output += " help&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Display this page.\n";
-			output += " clear&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Clear the screen.\n";
-			output += " pwd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Display the current working directory.\n";
-			output += " whoami&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Display the current user.\n";
+			output += "<strong><lcyan>---[]= SCIP Shell Available Commands =[]---</></strong>\n";
+			output += "--&nbsp<dcyan>help</>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<lcyan>Display this page.</>\n";
+			output += "--&nbsp<dcyan>clear</>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<lcyan>Clear the screen.</>\n";
+			output += "--&nbsp<dcyan>whoami</>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<lcyan>Display the current user.</>\n";
 			
 			break;
 		case 'clear':
@@ -129,29 +127,34 @@ shell.execute = function(command) {
 			shell.refresh();
             
 			break;
-		case 'pwd':
-            output += directory.replace('~','/home/' + shell.username);
-            
-			break;
 		case 'whoami':
             output += shell.username;
             
 			break;
-		case 'scp':
+		case 'svi':
 			if (args.length == 3 && args[1] == '-n') {
 				fetchSCP(args[2]);
 			} else {
-				output += "Invalid arguments.\n";
+				output += "<red>Invalid arguments.</>\n";
 				output += "-n &nbsp;&nbsp;&nbsp;Specify the item ID to fetch\n";
 			}
 
 			break;
 		default:
-            output += 'Unknown command: ' + args[0];
+            output += '<red>Unknown command:</> ' + args[0];
             
 			break;
     }
-	return output.replace(/\n/g,'<br>');
+	return replaceFormattingTags(output);
+}
+
+function replaceFormattingTags(str) {
+	return str.replace(/\n/g,'<br>')
+	.replace(/<lcyan>/g, "<p class='lightcyan'>")
+	.replace(/<dcyan>/g, "<p class='darkcyan'>")
+	.replace(/<red>/g, "<p class='red'>")
+	.replace(/<lyellow>/g, "<p class='lightyellow'>")
+	.replace(/<\/>/g, "</p>");
 }
 
 function fetchSCP(id) {
@@ -169,20 +172,20 @@ function fetchSCP(id) {
 
 			SCPsArray = $('strong:contains("Special Containment Procedures:")').parent().nextUntil('strong < p').addBack();
 			
-			output += "Subject class:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>" + objectClass + "</strong><br>";
-			output += "Subject number:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>" + id + "</strong><br><br>";
-			output += "Special Containment Procedures: <strong>[]</strong><br>";
+			output += "<lyellow>Subject class:</>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>" + objectClass + "</strong>\n";
+			output += "<lyellow>Subject number:</>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>" + id + "</strong>\n\n";
+			output += "<lyellow>Special Containment Procedures:</> <strong>[]</strong>\n";
 			output += "<div class='interfaceButton'>q: quit</div>";
 			output += "<div class='interfaceButton'>n: next</div>";
 			output += "<div class='interfaceButton'>p: prev</div>";
 
-			shell.print('scp -n ' + id, output);
+			shell.print('scp -n ' + id, replaceFormattingTags(output));
 			shell.promptText = ':';
 			shell.state = 1;
-			document.getElementById('prompt').innerHTML = shell.promptText;
-			document.getElementById('header').style.backgroundColor = 'orange';
 			document.getElementById('headerTitle').innerHTML = '<center>SCP Viewer Interface</center>';
-			document.getElementById('crt').style.backgroundImage = "url(assets/logo-orange.png)";
+			document.getElementById('prompt').innerHTML = shell.promptText;
+			document.getElementById('header').classList.add('scpViewer');
+			document.getElementById('crt').classList.add('scpViewer');
 		}
 	});
 }
@@ -226,16 +229,16 @@ var boot;
 var charDelay = 15;
 
 var messages = [
-	{text: "Preparing boot procedure...", delay: 1000},
-	{text: "===INITIATING STARTUP===", delay: 1000},
-	[{text: "Verifying local filesystems.... ", delay: 800}, {text: "done", delay: 300}],
-	[{text: "Enabling device drivers.... ", delay: 1200}, {text: "done", delay: 300}],
-	{text: "| akclac", delay: 500},
+	{text: "Preparing boot procedure...", delay: 500},
+	{text: "===INITIATING STARTUP===", delay: 500},
+	[{text: "Verifying local filesystems.... ", delay: 500}, {text: "done", delay: 300}],
+	[{text: "Enabling device drivers.... ", delay: 700}, {text: "done", delay: 300}],
+	{text: "| akclac", delay: 300},
 	{text: "| acjhasbd", delay: 200},
 	{text: "| pfjofp", delay: 300},
-	{text: "| dklb", delay: 500},
-	[{text: "…", delay: 200}, {text: "…", delay: 300}, {text: "…", delay: 500}, {text: "…", delay: 700}, {text: "…", delay: 200}, {text: "…", delay: 200}],
-	[{text: "Checking service protocol.... ", delay: 1200}, {text: "done", delay: 300}],
+	{text: "| dklb", delay: 300},
+	[{text: "…", delay: 200}, {text: "…", delay: 300}, {text: "…", delay: 300}, {text: "…", delay: 700}, {text: "…", delay: 200}, {text: "…", delay: 200}],
+	[{text: "Checking service protocol.... ", delay: 700}, {text: "done", delay: 300}],
 	{text: "Boot complete", delay: 500},
 ];
 
@@ -297,6 +300,5 @@ function displayBootMessage(message, subMessageId) {
 function initLoadingSequence() {
 	boot = document.getElementById('boot');
 
-	initShell();
-	// displayBootMessage(0, 0);
+	displayBootMessage(0, 0);
 }
